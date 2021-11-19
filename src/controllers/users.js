@@ -42,26 +42,28 @@ async function signup(req, res) {
   try {
     const { name, email, password } = req.body;
 
-    const emailExists = await connection.query(`SELECT email FROM users WHERE $1;`, [email]);
-
-    if (emailExists) {
+    const emailExists = await connection.query(`SELECT email FROM users WHERE email = $1;`, [
+      email,
+    ]);
+    if (emailExists.rowCount != 0) {
       res.status(409).send("Email já cadastrado");
       return;
-    }
-    const passwordHash = bcrypt.hashSync(password, 10);
+    } else {
+      const passwordHash = bcrypt.hashSync(password, 10);
 
-    const result = await connection.query(
-      `
+      const result = await connection.query(
+        `
           INSERT INTO users
           (name, email, password)
-          VALUES ($1, $2, $3)
+          VALUES ($1, $2, $3);
       `,
-      [name, email, passwordHash]
-    );
+        [name, email, passwordHash]
+      );
 
-    res.status(201).send(result);
+      res.status(201).send(result.rows);
+    }
   } catch (error) {
-    res.status(error);
+    res.status(420).send(error);
   }
 }
 

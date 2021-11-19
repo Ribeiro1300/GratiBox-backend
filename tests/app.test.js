@@ -41,7 +41,30 @@ describe("POST /login", () => {
 });
 
 describe("POST /signup", () => {
-  it("return status 201 for valid params", async () => {});
+  beforeAll(async () => {
+    const passwordHash = bcrypt.hashSync("123", 10);
+    await connection.query(
+      "INSERT INTO users (name,email,password) VALUES ('teste','teste@hotmail.com',$1);",
+      [passwordHash]
+    );
+  });
+
+  afterAll(async () => {
+    await connection.query("DELETE FROM sessions;");
+    await connection.query("DELETE FROM users;");
+  });
+
+  it("return status 201 for available email", async () => {
+    const body = { name: "teste2", email: "teste2@hotmail.com", password: "123" };
+    const result = await supertest(app).post("/signup").send(body);
+    expect(result.status).toEqual(201);
+  });
+
+  it("return status 409 for unavailable email", async () => {
+    const body = { name: "teste", email: "teste@hotmail.com", password: "123" };
+    const result = await supertest(app).post("/signup").send(body);
+    expect(result.status).toEqual(409);
+  });
 });
 
 afterAll(() => {
