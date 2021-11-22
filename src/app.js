@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { auth } from "./middlewares/auth.js";
 import { login, signup } from "./controllers/users.js";
-import { userPlan } from "./controllers/plans.js";
+import { userPlan, newPlan } from "./controllers/plans.js";
 import { deleteCurrentSession } from "./controllers/sessions.js";
 
 const app = express();
@@ -14,7 +14,7 @@ app.post("/login", login);
 app.post("/signup", signup);
 
 app.post("/plans", auth, userPlan);
-app.post("/newPlan", auth);
+app.post("/newPlan", auth, newPlan);
 
 app.post("/deleteSession", auth, deleteCurrentSession);
 
